@@ -7,7 +7,7 @@
     "displayName": "Todo"
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
@@ -24,6 +24,12 @@
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "todos"
+    },
+    "subTodos": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sub-todo.sub-todo",
+      "mappedBy": "todo"
     }
   }
 }

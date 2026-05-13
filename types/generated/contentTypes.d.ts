@@ -440,6 +440,36 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiSubTodoSubTodo extends Struct.CollectionTypeSchema {
+  collectionName: 'sub_todos';
+  info: {
+    displayName: 'SubTodo';
+    pluralName: 'sub-todos';
+    singularName: 'sub-todo';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    isCompleted: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sub-todo.sub-todo'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String & Schema.Attribute.Required;
+    todo: Schema.Attribute.Relation<'manyToOne', 'api::todo.todo'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTodoTodo extends Struct.CollectionTypeSchema {
   collectionName: 'todos';
   info: {
@@ -448,7 +478,7 @@ export interface ApiTodoTodo extends Struct.CollectionTypeSchema {
     singularName: 'todo';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     createdAt: Schema.Attribute.DateTime;
@@ -459,6 +489,7 @@ export interface ApiTodoTodo extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::todo.todo'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    subTodos: Schema.Attribute.Relation<'oneToMany', 'api::sub-todo.sub-todo'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -981,6 +1012,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::sub-todo.sub-todo': ApiSubTodoSubTodo;
       'api::todo.todo': ApiTodoTodo;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

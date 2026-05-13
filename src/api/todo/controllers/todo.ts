@@ -1,4 +1,7 @@
 import { factories } from "@strapi/strapi";
+import { generateSubTodosWithAI } from "../../sub-todo/services/ai-generator";
+
+const toNumber = (value: unknown) => parseInt(String(value), 10);
 
 export default factories.createCoreController(
   "api::todo.todo",
@@ -10,18 +13,54 @@ export default factories.createCoreController(
         return ctx.unauthorized("You must be logged in");
       }
 
-      const { title, isCompleted } = ctx.request.body.data;
+      const { title } = ctx.request.body.data;
 
+      console.log("[Todo Create] Creating todo with title:", title);
+
+      // CREATE MAIN TODO
       const todo = await strapi.entityService.create("api::todo.todo", {
         data: {
           title,
-          isCompleted: isCompleted || false,
+          isCompleted: false,
           users_permissions_user: userId,
         },
       });
 
+      console.log("[Todo Create] Todo created with ID:", todo.id);
+
+      // GENERATE AI SUBTODOS
+      console.log("[Todo Create] Starting AI generation...");
+
+      const generatedSubTodos = await generateSubTodosWithAI(title);
+
+      console.log("[Todo Create] AI generated subtodos:", generatedSubTodos);
+
+      // INSERT SUBTODOS INTO DB
+      const createdSubTodos = [];
+
+      for (const subTitle of generatedSubTodos) {
+        const createdSubTodo = await strapi.entityService.create(
+          "api::sub-todo.sub-todo",
+          {
+            data: {
+              title: subTitle,
+              isCompleted: false,
+              todo: todo.id,
+            },
+          },
+        );
+
+        createdSubTodos.push(createdSubTodo);
+      }
+
+      console.log("[Todo Create] Created", createdSubTodos.length, "SubTodos");
+
+      // RETURN EVERYTHING
       return {
-        data: todo,
+        data: {
+          ...todo,
+          subTodos: createdSubTodos,
+        },
       };
     },
 
@@ -37,7 +76,10 @@ export default factories.createCoreController(
         populate: "*",
       });
 
-      if (!todo || (todo as any).users_permissions_user?.id !== userId) {
+      if (
+        !todo ||
+        toNumber((todo as any).users_permissions_user?.id) !== toNumber(userId)
+      ) {
         return ctx.notFound("Todo not found");
       }
 
@@ -66,7 +108,10 @@ export default factories.createCoreController(
         populate: ["users_permissions_user"],
       });
 
-      if (!todo || (todo as any).users_permissions_user?.id !== userId) {
+      if (
+        !todo ||
+        toNumber((todo as any).users_permissions_user?.id) !== toNumber(userId)
+      ) {
         return ctx.notFound("Todo not found");
       }
 
@@ -93,7 +138,7 @@ export default factories.createCoreController(
           },
         },
         sort: { createdAt: "desc" },
-        populate: ["users_permissions_user"],
+        populate: ["users_permissions_user", "subTodos"],
       });
 
       return {

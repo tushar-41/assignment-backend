@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sub_todos",
+  "info": {
+    "singularName": "sub-todo",
+    "pluralName": "sub-todos",
+    "displayName": "SubTodo"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "isCompleted": {
+      "type": "boolean",
+      "default": false
+    },
+    "todo": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::todo.todo",
+      "inversedBy": "subTodos"
+    }
+  }
+}

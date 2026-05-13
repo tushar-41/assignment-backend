@@ -7,7 +7,7 @@ const config: Core.Config.Middlewares = [
   {
     name: "strapi::cors",
     config: {
-      origin: ["https://taskflow-todo-pi.vercel.app"],
+      origin: ["https://taskflow-todo-pi.vercel.app", "http://localhost:3000"],
       credentials: true,
     },
   },
